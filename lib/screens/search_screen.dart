@@ -4,6 +4,7 @@ import 'package:singify/models/song_model.dart';
 import 'package:singify/screens/home_screen.dart';
 import 'package:singify/screens/favorites_screen.dart';
 import 'package:singify/screens/player_screen.dart';
+import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 import 'package:singify/widgets/popular_lyric_card.dart';
@@ -98,6 +99,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _recentSearches.insert(0, query);
       
       // Keep only the most recent 5 searches
+      
       if (_recentSearches.length > 5) {
         _recentSearches.removeLast();
       }
@@ -146,125 +148,166 @@ class _SearchScreenState extends State<SearchScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        automaticallyImplyLeading: false, // Remove back button
-        title: const Text(
-          'Singify',
-          style: TextStyle(
-            color: Color(0xFF8b2cf5),
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(70),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(
-                  color: Color(0xFF282828), // Darker text for better readability
-                  fontSize: 16,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Standardized App Bar with consistent height and padding
+            Container(
+              color: Colors.white,
+              height: 60, // Fixed height for consistency
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Singify',
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        color: const Color(0xFF8b2cf5),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 40), // Placeholder for balance
+                  ],
                 ),
-                decoration: InputDecoration(
-                  hintText: 'Search songs, artist, or lyrics...',
-                  hintStyle: TextStyle(
-                    color: Colors.grey[600], // Darker hint text
-                  ),
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFF666666)),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, color: Color(0xFF666666)),
-                          onPressed: () {
-                            _searchController.clear();
-                            _performSearch('');
-                            // Add haptic feedback
-                            HapticFeedback.lightImpact();
-                          },
-                        )
-                      : null,
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
-                ),
-                onSubmitted: (value) {
-                  _addToRecentSearches(value);
-                  _performSearch(value);
-                  // Add haptic feedback
-                  HapticFeedback.mediumImpact();
-                },
-                onChanged: _performSearch,
               ),
             ),
-          ),
-        ),
-      ),
-      body: _showSearchResults
-          ? _buildSearchResults()
-          : _buildSearchHome(),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, -1),
+            
+            // Divider for visual separation
+            Divider(
+              height: 1,
+              thickness: 1,
+              color: Colors.grey[200],
+            ),
+            
+            // Search Bar
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  style: const TextStyle(
+                    color: Color(0xFF282828), // Darker text for better readability
+                    fontSize: 16,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Search songs, artist, or lyrics...',
+                    hintStyle: TextStyle(
+                      color: Colors.grey[600], // Darker hint text
+                    ),
+                    prefixIcon: const Icon(Icons.search, color: Color(0xFF666666)),
+                    suffixIcon: _searchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, color: Color(0xFF666666)),
+                            onPressed: () {
+                              _searchController.clear();
+                              _performSearch('');
+                              // Add haptic feedback
+                              HapticFeedback.lightImpact();
+                            },
+                          )
+                        : null,
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                  ),
+                  onSubmitted: (value) {
+                    _addToRecentSearches(value);
+                    _performSearch(value);
+                    // Add haptic feedback
+                    HapticFeedback.mediumImpact();
+                  },
+                  onChanged: _performSearch,
+                ),
+              ),
+            ),
+            
+            // Main Content
+            Expanded(
+              child: _showSearchResults
+                  ? _buildSearchResults()
+                  : _buildSearchHome(),
+            ),
+            
+            // Bottom Navigation
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, -1),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    NavItem(
+                      icon: Icons.home,
+                      label: 'Home',
+                      isSelected: _currentIndex == 0,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        // Navigate to home screen
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          (route) => false,
+                        );
+                      },
+                    ),
+                    NavItem(
+                      icon: Icons.explore,
+                      label: 'Explore',
+                      isSelected: _currentIndex == 1,
+                      onTap: () {
+                        // Already on explore/search screen
+                        HapticFeedback.selectionClick();
+                      },
+                    ),
+                    NavItem(
+                      icon: Icons.favorite,
+                      label: 'Favorite',
+                      isSelected: _currentIndex == 2,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        // Navigate to favorites screen
+                        Navigator.push(
+                          context,
+                          NoAnimationPageRoute(
+                            builder: (context) => const FavoritesScreen(showFullScreen: true),
+                          ),
+                        );
+                      },
+                    ),
+                    NavItem(
+                      icon: Icons.person,
+                      label: 'Profile',
+                      isSelected: _currentIndex == 3,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        // Navigate to profile screen
+                        Navigator.push(
+                          context,
+                          NoAnimationPageRoute(
+                            builder: (context) => const ProfileScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              NavItem(
-                icon: Icons.home,
-                label: 'Home',
-                isSelected: _currentIndex == 0,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  // Navigate to home screen
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomeScreen()),
-                    (route) => false,
-                  );
-                },
-              ),
-              NavItem(
-                icon: Icons.explore,
-                label: 'Explore',
-                isSelected: _currentIndex == 1,
-                onTap: () {
-                  // Already on explore/search screen
-                  HapticFeedback.selectionClick();
-                },
-              ),
-              NavItem(
-                icon: Icons.favorite,
-                label: 'Favorite',
-                isSelected: _currentIndex == 2,
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  // Navigate to favorites screen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FavoritesScreen(showFullScreen: true),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
         ),
       ),
     );

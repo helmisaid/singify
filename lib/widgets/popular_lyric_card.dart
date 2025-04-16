@@ -21,7 +21,7 @@ class PopularLyricCard extends StatelessWidget {
     return Material(
       color: cardColor,
       borderRadius: BorderRadius.circular(15),
-      elevation: 3, // Slightly increased elevation
+      elevation: 1, // Reduced elevation for more modern look
       child: InkWell(
         onTap: () {
           print("Popular lyric card tapped: ${song.title}");

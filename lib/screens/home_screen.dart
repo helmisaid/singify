@@ -5,11 +5,29 @@ import 'package:singify/screens/favorites_screen.dart';
 import 'package:singify/screens/genres_screen.dart';
 import 'package:singify/screens/genre_details_screen.dart';
 import 'package:singify/screens/search_screen.dart';
+import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/featured_song_card.dart';
 import 'package:singify/widgets/genre_card.dart';
 import 'package:singify/widgets/nav_item.dart';
 import 'package:singify/widgets/popular_lyric_card.dart';
+
+class NoAnimationPageRoute<T> extends MaterialPageRoute<T> {
+  NoAnimationPageRoute({
+    required WidgetBuilder builder,
+    RouteSettings? settings,
+  }) : super(builder: builder, settings: settings);
+
+  @override
+  Widget buildTransitions(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return child; // Return the child directly without any transition animation
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -32,11 +50,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // App Bar with pure white background
+            // Standardized App Bar with consistent height and padding
             Container(
               color: Colors.white,
+              height: 60, // Fixed height for consistency
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -139,6 +158,22 @@ class _HomeScreenState extends State<HomeScreen> {
                         setState(() {
                           _currentIndex = 1;
                         });
+                        // No animation needed as it's switching tabs in the same screen
+                      },
+                    ),
+                    NavItem(
+                      icon: Icons.person,
+                      label: 'Profile',
+                      isSelected: false,
+                      onTap: () {
+                        // Add haptic feedback
+                        HapticFeedback.selectionClick();
+                        Navigator.push(
+                          context,
+                          NoAnimationPageRoute(
+                            builder: (context) => const ProfileScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

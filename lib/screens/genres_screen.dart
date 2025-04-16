@@ -5,6 +5,7 @@ import 'package:singify/screens/genre_details_screen.dart';
 import 'package:singify/screens/home_screen.dart';
 import 'package:singify/screens/search_screen.dart';
 import 'package:singify/screens/favorites_screen.dart';
+import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 
@@ -22,37 +23,17 @@ class _GenresScreenState extends State<GenresScreen> {
   final List<Map<String, dynamic>> _featuredGenres = [
     {'name': 'Pop', 'color': const Color(0xFF8b2cf5), 'songs': '1.2M Songs'},
     {'name': 'Rock', 'color': const Color(0xFFe63946), 'songs': '1.2M Songs'},
-    {
-      'name': 'Hip Hop',
-      'color': const Color(0xFF3985ff),
-      'songs': '1.2M Songs'
-    },
+    {'name': 'Hip Hop', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
     {'name': 'R&B', 'color': const Color(0xFFf9844a), 'songs': '1.2M Songs'},
   ];
 
   // All genres list
   final List<Map<String, dynamic>> _allGenres = [
-    {
-      'name': 'Hip Hop',
-      'color': const Color(0xFF3985ff),
-      'songs': '1.2M Songs'
-    },
+    {'name': 'Hip Hop', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
     {'name': 'Jazz', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
-    {
-      'name': 'Classical',
-      'color': const Color(0xFF3985ff),
-      'songs': '1.2M Songs'
-    },
-    {
-      'name': 'Electronic',
-      'color': const Color(0xFF3985ff),
-      'songs': '1.2M Songs'
-    },
-    {
-      'name': 'Country',
-      'color': const Color(0xFF3985ff),
-      'songs': '1.2M Songs'
-    },
+    {'name': 'Classical', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
+    {'name': 'Electronic', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
+    {'name': 'Country', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
     {'name': 'Blues', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
     {'name': 'Reggae', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
     {'name': 'Folk', 'color': const Color(0xFF3985ff), 'songs': '1.2M Songs'},
@@ -65,30 +46,28 @@ class _GenresScreenState extends State<GenresScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // App Bar with white background
+            // Standardized App Bar with consistent height and padding
             Container(
               color: Colors.white,
+              height: 60, // Fixed height for consistency
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Singify',
-                      style:
-                          Theme.of(context).textTheme.headlineLarge?.copyWith(
-                                color: const Color(0xFF8b2cf5),
-                                fontWeight: FontWeight.bold,
-                              ),
+                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                        color: const Color(0xFF8b2cf5),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Material(
                       color: Colors.transparent,
                       shape: const CircleBorder(),
                       clipBehavior: Clip.hardEdge,
                       child: IconButton(
-                        icon:
-                            const Icon(Icons.search, color: Color(0xFF666666)),
+                        icon: const Icon(Icons.search, color: Color(0xFF666666)),
                         onPressed: () {
                           HapticFeedback.selectionClick();
                           Navigator.push(
@@ -99,15 +78,14 @@ class _GenresScreenState extends State<GenresScreen> {
                           );
                         },
                         splashColor: const Color(0xFF8b2cf5).withOpacity(0.2),
-                        highlightColor:
-                            const Color(0xFF8b2cf5).withOpacity(0.1),
+                        highlightColor: const Color(0xFF8b2cf5).withOpacity(0.1),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-
+            
             // Main Content
             Expanded(
               child: SingleChildScrollView(
@@ -125,7 +103,7 @@ class _GenresScreenState extends State<GenresScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
+                      
                       // Featured Genres Grid
                       GridView.count(
                         shrinkWrap: true,
@@ -142,9 +120,9 @@ class _GenresScreenState extends State<GenresScreen> {
                           );
                         }).toList(),
                       ),
-
+                      
                       const SizedBox(height: 24),
-
+                      
                       const Text(
                         'All Genres',
                         style: TextStyle(
@@ -154,7 +132,7 @@ class _GenresScreenState extends State<GenresScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
+                      
                       // All Genres List
                       ListView.builder(
                         shrinkWrap: true,
@@ -173,7 +151,7 @@ class _GenresScreenState extends State<GenresScreen> {
                 ),
               ),
             ),
-
+            
             // Bottom Navigation
             Container(
               decoration: BoxDecoration(
@@ -200,8 +178,7 @@ class _GenresScreenState extends State<GenresScreen> {
                         HapticFeedback.selectionClick();
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
+                          MaterialPageRoute(builder: (context) => const HomeScreen()),
                           (route) => false,
                         );
                       },
@@ -214,8 +191,7 @@ class _GenresScreenState extends State<GenresScreen> {
                         HapticFeedback.selectionClick();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const SearchScreen()),
+                          MaterialPageRoute(builder: (context) => const SearchScreen()),
                         );
                       },
                     ),
@@ -227,9 +203,23 @@ class _GenresScreenState extends State<GenresScreen> {
                         HapticFeedback.selectionClick();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const FavoritesScreen(showFullScreen: true),
+                          NoAnimationPageRoute(
+                            builder: (context) => const FavoritesScreen(showFullScreen: true),
+                          ),
+                        );
+                      },
+                    ),
+                    NavItem(
+                      icon: Icons.person,
+                      label: 'Profile',
+                      isSelected: _currentIndex == 3,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        // Navigate to profile screen
+                        Navigator.push(
+                          context,
+                          NoAnimationPageRoute(
+                            builder: (context) => const ProfileScreen(),
                           ),
                         );
                       },

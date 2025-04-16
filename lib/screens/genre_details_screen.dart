@@ -4,6 +4,7 @@ import 'package:singify/models/song_model.dart';
 import 'package:singify/screens/home_screen.dart';
 import 'package:singify/screens/search_screen.dart';
 import 'package:singify/screens/favorites_screen.dart';
+import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 import 'package:singify/widgets/popular_lyric_card.dart';
@@ -29,6 +30,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
   @override
   void initState() {
     super.initState();
+
     // Filter songs by genre
     _genreSongs = [...featuredSongs, ...popularLyrics].where((song) {
       return song.genre.toLowerCase() == widget.genre.toLowerCase();
@@ -69,28 +71,36 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // App Bar with pure white background
+            // Standardized App Bar with consistent height and padding
             Container(
               color: Colors.white,
+              height: 60, // Fixed height for consistency
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back, color: Color(0xFF666666)),
+                          icon: const Icon(Icons.arrow_back,
+                              color: Color(0xFF666666)),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
                           onPressed: () {
                             Navigator.pop(context);
                           },
                         ),
+                        const SizedBox(width: 8),
                         Text(
                           'Singify',
-                          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                            color: const Color(0xFF8b2cf5),
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineLarge
+                              ?.copyWith(
+                                color: const Color(0xFF8b2cf5),
+                                fontWeight: FontWeight.bold,
+                              ),
                         ),
                       ],
                     ),
@@ -99,7 +109,8 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                       shape: const CircleBorder(),
                       clipBehavior: Clip.hardEdge,
                       child: IconButton(
-                        icon: const Icon(Icons.search, color: Color(0xFF666666)),
+                        icon:
+                            const Icon(Icons.search, color: Color(0xFF666666)),
                         onPressed: () {
                           HapticFeedback.selectionClick();
                           Navigator.push(
@@ -110,21 +121,22 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                           );
                         },
                         splashColor: const Color(0xFF8b2cf5).withOpacity(0.2),
-                        highlightColor: const Color(0xFF8b2cf5).withOpacity(0.1),
+                        highlightColor:
+                            const Color(0xFF8b2cf5).withOpacity(0.1),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             // Divider for visual separation
             Divider(
               height: 1,
               thickness: 1,
               color: Colors.grey[200],
             ),
-            
+
             // Genre Header
             Container(
               width: double.infinity,
@@ -152,7 +164,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                 ],
               ),
             ),
-            
+
             // Main Content - Song List
             Expanded(
               child: Padding(
@@ -184,7 +196,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                 ),
               ),
             ),
-            
+
             // Bottom Navigation
             Container(
               decoration: BoxDecoration(
@@ -211,7 +223,8 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                         HapticFeedback.selectionClick();
                         Navigator.pushAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const HomeScreen()),
                           (route) => false,
                         );
                       },
@@ -224,7 +237,8 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                         HapticFeedback.selectionClick();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const SearchScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => const SearchScreen()),
                         );
                       },
                     ),
@@ -236,8 +250,24 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                         HapticFeedback.selectionClick();
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const FavoritesScreen(showFullScreen: true),
+                          NoAnimationPageRoute(
+                            builder: (context) =>
+                                const FavoritesScreen(showFullScreen: true),
+                          ),
+                        );
+                      },
+                    ),
+                    NavItem(
+                      icon: Icons.person,
+                      label: 'Profile',
+                      isSelected: _currentIndex == 3,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        // Navigate to profile screen
+                        Navigator.push(
+                          context,
+                          NoAnimationPageRoute(
+                            builder: (context) => const ProfileScreen(),
                           ),
                         );
                       },

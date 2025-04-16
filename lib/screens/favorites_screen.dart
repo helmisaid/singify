@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:singify/models/song_model.dart';
 import 'package:singify/screens/home_screen.dart';
 import 'package:singify/screens/search_screen.dart';
+import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/services/favorites_service.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
@@ -40,11 +41,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // App Bar - Matching the home screen style with pure white background
+            // Standardized App Bar with consistent height and padding
             Container(
               color: Colors.white,
+              height: 60, // Fixed height for consistency
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -144,6 +146,21 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       onTap: () {
                         HapticFeedback.selectionClick();
                         // Already on favorites screen
+                      },
+                    ),
+                    NavItem(
+                      icon: Icons.person,
+                      label: 'Profile',
+                      isSelected: _currentIndex == 3,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        // Navigate to profile screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProfileScreen(),
+                          ),
+                        );
                       },
                     ),
                   ],

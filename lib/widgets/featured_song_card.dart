@@ -21,7 +21,7 @@ class FeaturedSongCard extends StatelessWidget {
     return Material(
       color: cardColor,
       borderRadius: BorderRadius.circular(15),
-      elevation: 3, // Slightly increased elevation for better shadow
+      elevation: 1, // Reduced elevation for more modern look
       child: InkWell(
         onTap: () {
           print("Featured song card tapped: ${song.title}");
@@ -88,12 +88,18 @@ class FeaturedSongCard extends StatelessWidget {
                               ),
                             );
                           },
-                          icon: const Icon(Icons.play_arrow, size: 20),
+                          icon: const Icon(
+                            Icons.play_arrow,
+                            size: 20,
+                            color: Colors
+                                .white, // Mengubah warna icon play menjadi kuning
+                          ),
                           label: const Text('Play Now'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primaryColor,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 10),
                             textStyle: const TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 14,
@@ -111,9 +117,9 @@ class FeaturedSongCard extends StatelessWidget {
                             favoritesService.toggleFavorite(song);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text(
-                                  isFavorite ? 'Removed from favorites' : 'Added to favorites'
-                                ),
+                                content: Text(isFavorite
+                                    ? 'Removed from favorites'
+                                    : 'Added to favorites'),
                                 duration: const Duration(seconds: 1),
                               ),
                             );
