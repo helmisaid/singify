@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:singify/models/genre_model.dart';
-import 'package:singify/screens/genre_details_screen.dart';
 
 class GenreCard extends StatelessWidget {
   final Genre genre;
@@ -34,14 +33,10 @@ class GenreCard extends StatelessWidget {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          Navigator.push(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(
-              builder: (context) => GenreDetailsScreen(
-                genre: genre.name,
-                color: color,
-              ),
-            ),
+            '/genre_details',
+            arguments: {'genre': genre.name, 'color': color},
           );
         },
         borderRadius: BorderRadius.circular(12),

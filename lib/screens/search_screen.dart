@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:singify/models/song_model.dart';
-import 'package:singify/screens/home_screen.dart';
-import 'package:singify/screens/favorites_screen.dart';
-import 'package:singify/screens/player_screen.dart';
-import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 import 'package:singify/widgets/popular_lyric_card.dart';
@@ -99,7 +95,6 @@ class _SearchScreenState extends State<SearchScreen> {
       _recentSearches.insert(0, query);
       
       // Keep only the most recent 5 searches
-      
       if (_recentSearches.length > 5) {
         _recentSearches.removeLast();
       }
@@ -256,10 +251,9 @@ class _SearchScreenState extends State<SearchScreen> {
                       isSelected: _currentIndex == 0,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to home screen
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          '/home',
                           (route) => false,
                         );
                       },
@@ -279,12 +273,10 @@ class _SearchScreenState extends State<SearchScreen> {
                       isSelected: _currentIndex == 2,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to favorites screen
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const FavoritesScreen(showFullScreen: true),
-                          ),
+                          '/favorites',
+                          arguments: {'showFullScreen': true},
                         );
                       },
                     ),
@@ -294,13 +286,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       isSelected: _currentIndex == 3,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to profile screen
-                        Navigator.push(
-                          context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const ProfileScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/profile');
                       },
                     ),
                   ],
@@ -656,7 +642,16 @@ class _SearchScreenState extends State<SearchScreen> {
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 15),
-                    child: PopularLyricCard(song: _searchResults[index]),
+                    child: PopularLyricCard(
+                      song: _searchResults[index],
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/player',
+                          arguments: _searchResults[index],
+                        );
+                      },
+                    ),
                   );
                 },
               ),

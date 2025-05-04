@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:singify/models/song_model.dart';
-import 'package:singify/screens/player_screen.dart';
 import 'package:singify/services/favorites_service.dart';
 import 'package:singify/utils/constants.dart';
 
@@ -25,11 +24,10 @@ class FeaturedSongCard extends StatelessWidget {
       child: InkWell(
         onTap: () {
           print("Featured song card tapped: ${song.title}");
-          Navigator.push(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(
-              builder: (context) => PlayerScreen(song: song),
-            ),
+            '/player',
+            arguments: song,
           );
         },
         borderRadius: BorderRadius.circular(15),
@@ -81,18 +79,16 @@ class FeaturedSongCard extends StatelessWidget {
                         ElevatedButton.icon(
                           onPressed: () {
                             print("Play Now button pressed: ${song.title}");
-                            Navigator.push(
+                            Navigator.pushNamed(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => PlayerScreen(song: song),
-                              ),
+                              '/player',
+                              arguments: song,
                             );
                           },
                           icon: const Icon(
                             Icons.play_arrow,
                             size: 20,
-                            color: Colors
-                                .white, // Mengubah warna icon play menjadi kuning
+                            color: Colors.white, // Mengubah warna icon play menjadi putih
                           ),
                           label: const Text('Play Now'),
                           style: ElevatedButton.styleFrom(

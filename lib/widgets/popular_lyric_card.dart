@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:singify/models/song_model.dart';
-import 'package:singify/screens/player_screen.dart';
 import 'package:singify/services/favorites_service.dart';
 import 'package:singify/utils/constants.dart';
 
 class PopularLyricCard extends StatelessWidget {
   final Song song;
+  final VoidCallback? onTap;
 
   const PopularLyricCard({
     Key? key,
     required this.song,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -23,15 +24,15 @@ class PopularLyricCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(15),
       elevation: 1, // Reduced elevation for more modern look
       child: InkWell(
-        onTap: () {
-          print("Popular lyric card tapped: ${song.title}");
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PlayerScreen(song: song),
-            ),
-          );
-        },
+        onTap: onTap ??
+            () {
+              print("Popular lyric card tapped: ${song.title}");
+              Navigator.pushNamed(
+                context,
+                '/player',
+                arguments: song,
+              );
+            },
         borderRadius: BorderRadius.circular(15),
         child: Padding(
           padding: const EdgeInsets.all(16), // Increased padding
@@ -69,15 +70,15 @@ class PopularLyricCard extends StatelessWidget {
                         color: primaryColor,
                         size: 32, // Slightly larger
                       ),
-                      onPressed: () {
-                        print("Play button pressed: ${song.title}");
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => PlayerScreen(song: song),
-                          ),
-                        );
-                      },
+                      onPressed: onTap ??
+                          () {
+                            print("Play button pressed: ${song.title}");
+                            Navigator.pushNamed(
+                              context,
+                              '/player',
+                              arguments: song,
+                            );
+                          },
                       splashRadius: 24,
                       padding: const EdgeInsets.all(8), // Added padding
                     ),

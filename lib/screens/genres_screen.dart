@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:singify/models/genre_model.dart';
-import 'package:singify/screens/genre_details_screen.dart';
-import 'package:singify/screens/home_screen.dart';
-import 'package:singify/screens/search_screen.dart';
-import 'package:singify/screens/favorites_screen.dart';
-import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 
@@ -70,12 +65,7 @@ class _GenresScreenState extends State<GenresScreen> {
                         icon: const Icon(Icons.search, color: Color(0xFF666666)),
                         onPressed: () {
                           HapticFeedback.selectionClick();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SearchScreen(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/search');
                         },
                         splashColor: const Color(0xFF8b2cf5).withOpacity(0.2),
                         highlightColor: const Color(0xFF8b2cf5).withOpacity(0.1),
@@ -176,9 +166,9 @@ class _GenresScreenState extends State<GenresScreen> {
                       isSelected: _currentIndex == 0,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          '/home',
                           (route) => false,
                         );
                       },
@@ -189,10 +179,7 @@ class _GenresScreenState extends State<GenresScreen> {
                       isSelected: _currentIndex == 1,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SearchScreen()),
-                        );
+                        Navigator.pushNamed(context, '/search');
                       },
                     ),
                     NavItem(
@@ -201,11 +188,10 @@ class _GenresScreenState extends State<GenresScreen> {
                       isSelected: _currentIndex == 2,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const FavoritesScreen(showFullScreen: true),
-                          ),
+                          '/favorites',
+                          arguments: {'showFullScreen': true},
                         );
                       },
                     ),
@@ -215,13 +201,7 @@ class _GenresScreenState extends State<GenresScreen> {
                       isSelected: _currentIndex == 3,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to profile screen
-                        Navigator.push(
-                          context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const ProfileScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/profile');
                       },
                     ),
                   ],
@@ -241,14 +221,10 @@ class _GenresScreenState extends State<GenresScreen> {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          Navigator.push(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(
-              builder: (context) => GenreDetailsScreen(
-                genre: name,
-                color: color,
-              ),
-            ),
+            '/genre_details',
+            arguments: {'genre': name, 'color': color},
           );
         },
         borderRadius: BorderRadius.circular(16),
@@ -290,14 +266,10 @@ class _GenresScreenState extends State<GenresScreen> {
         child: InkWell(
           onTap: () {
             HapticFeedback.mediumImpact();
-            Navigator.push(
+            Navigator.pushNamed(
               context,
-              MaterialPageRoute(
-                builder: (context) => GenreDetailsScreen(
-                  genre: name,
-                  color: color,
-                ),
-              ),
+              '/genre_details',
+              arguments: {'genre': name, 'color': color},
             );
           },
           borderRadius: BorderRadius.circular(12),

@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:singify/models/song_model.dart';
-import 'package:singify/screens/home_screen.dart';
-import 'package:singify/screens/search_screen.dart';
-import 'package:singify/screens/favorites_screen.dart';
-import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 import 'package:singify/widgets/popular_lyric_card.dart';
 
 class GenreDetailsScreen extends StatefulWidget {
-  final String genre;
-  final Color color;
-
-  const GenreDetailsScreen({
-    Key? key,
-    required this.genre,
-    required this.color,
-  }) : super(key: key);
+  const GenreDetailsScreen({Key? key}) : super(key: key);
 
   @override
   State<GenreDetailsScreen> createState() => _GenreDetailsScreenState();
@@ -26,46 +15,56 @@ class GenreDetailsScreen extends StatefulWidget {
 class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
   int _currentIndex = 0;
   late List<Song> _genreSongs;
+  late String genre;
+  late Color color;
 
   @override
   void initState() {
     super.initState();
 
-    // Filter songs by genre
-    _genreSongs = [...featuredSongs, ...popularLyrics].where((song) {
-      return song.genre.toLowerCase() == widget.genre.toLowerCase();
-    }).toList();
-
-    // If no songs match the genre, add some placeholder songs
-    if (_genreSongs.isEmpty) {
-      _genreSongs = [
-        Song(
-          id: 'g1',
-          title: '${widget.genre} Hit 1',
-          artist: 'Various Artists',
-          albumArt: 'assets/images/album_covers/default.jpg',
-          genre: widget.genre,
-        ),
-        Song(
-          id: 'g2',
-          title: '${widget.genre} Hit 2',
-          artist: 'Top ${widget.genre} Artist',
-          albumArt: 'assets/images/album_covers/default.jpg',
-          genre: widget.genre,
-        ),
-        Song(
-          id: 'g3',
-          title: 'Best of ${widget.genre}',
-          artist: 'Various Artists',
-          albumArt: 'assets/images/album_covers/default.jpg',
-          genre: widget.genre,
-        ),
-      ];
-    }
+    // Parameter genre dan color akan diambil dari arguments di build()
+    // Inisialisasi _genreSongs dilakukan setelah mendapatkan genre
   }
 
   @override
   Widget build(BuildContext context) {
+    // Ambil parameter dari arguments
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    genre = args?['genre'] ?? 'Unknown Genre';
+    color = args?['color'] ?? Colors.grey;
+
+    // Filter songs by genre
+    _genreSongs = [...featuredSongs, ...popularLyrics].where((song) {
+      return song.genre.toLowerCase() == genre.toLowerCase();
+    }).toList();
+
+    // Jika tidak ada lagu yang cocok dengan genre, tambah placeholder
+    if (_genreSongs.isEmpty) {
+      _genreSongs = [
+        Song(
+          id: 'g1',
+          title: '$genre Hit 1',
+          artist: 'Various Artists',
+          albumArt: 'assets/images/album_covers/default.jpg',
+          genre: genre,
+        ),
+        Song(
+          id: 'g2',
+          title: '$genre Hit 2',
+          artist: 'Top $genre Artist',
+          albumArt: 'assets/images/album_covers/default.jpg',
+          genre: genre,
+        ),
+        Song(
+          id: 'g3',
+          title: 'Best of $genre',
+          artist: 'Various Artists',
+          albumArt: 'assets/images/album_covers/default.jpg',
+          genre: genre,
+        ),
+      ];
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -113,12 +112,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                             const Icon(Icons.search, color: Color(0xFF666666)),
                         onPressed: () {
                           HapticFeedback.selectionClick();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SearchScreen(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/search');
                         },
                         splashColor: const Color(0xFF8b2cf5).withOpacity(0.2),
                         highlightColor:
@@ -141,16 +135,16 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
-              color: widget.color.withOpacity(0.1),
+              color: color.withOpacity(0.1),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.genre,
+                    genre,
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: widget.color,
+                      color: color,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -158,7 +152,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                     '${_genreSongs.length} Songs',
                     style: TextStyle(
                       fontSize: 16,
-                      color: widget.color.withOpacity(0.8),
+                      color: color.withOpacity(0.8),
                     ),
                   ),
                 ],
@@ -173,7 +167,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Popular in ${widget.genre}',
+                      'Popular in $genre',
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -221,10 +215,9 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                       isSelected: _currentIndex == 0,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
+                          '/home',
                           (route) => false,
                         );
                       },
@@ -235,11 +228,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                       isSelected: _currentIndex == 1,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SearchScreen()),
-                        );
+                        Navigator.pushNamed(context, '/search');
                       },
                     ),
                     NavItem(
@@ -248,12 +237,10 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                       isSelected: _currentIndex == 2,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          NoAnimationPageRoute(
-                            builder: (context) =>
-                                const FavoritesScreen(showFullScreen: true),
-                          ),
+                          '/favorites',
+                          arguments: {'showFullScreen': true},
                         );
                       },
                     ),
@@ -263,13 +250,7 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
                       isSelected: _currentIndex == 3,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to profile screen
-                        Navigator.push(
-                          context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const ProfileScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/profile');
                       },
                     ),
                   ],

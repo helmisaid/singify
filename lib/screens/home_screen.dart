@@ -12,23 +12,6 @@ import 'package:singify/widgets/genre_card.dart';
 import 'package:singify/widgets/nav_item.dart';
 import 'package:singify/widgets/popular_lyric_card.dart';
 
-class NoAnimationPageRoute<T> extends MaterialPageRoute<T> {
-  NoAnimationPageRoute({
-    required WidgetBuilder builder,
-    RouteSettings? settings,
-  }) : super(builder: builder, settings: settings);
-
-  @override
-  Widget buildTransitions(
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) {
-    return child; // Return the child directly without any transition animation
-  }
-}
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -73,14 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: IconButton(
                         icon: const Icon(Icons.search, color: Color(0xFF666666)),
                         onPressed: () {
-                          // Add haptic feedback
                           HapticFeedback.selectionClick();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SearchScreen(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/search');
                         },
                         splashColor: const Color(0xFF8b2cf5).withOpacity(0.2),
                         highlightColor: const Color(0xFF8b2cf5).withOpacity(0.1),
@@ -126,7 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Home',
                       isSelected: _currentIndex == 0,
                       onTap: () {
-                        // Add haptic feedback
                         HapticFeedback.selectionClick();
                         setState(() {
                           _currentIndex = 0;
@@ -138,14 +114,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Explore',
                       isSelected: false,
                       onTap: () {
-                        // Add haptic feedback
                         HapticFeedback.selectionClick();
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SearchScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/search');
                       },
                     ),
                     NavItem(
@@ -153,12 +123,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Favorite',
                       isSelected: _currentIndex == 1,
                       onTap: () {
-                        // Add haptic feedback
                         HapticFeedback.selectionClick();
                         setState(() {
                           _currentIndex = 1;
                         });
-                        // No animation needed as it's switching tabs in the same screen
                       },
                     ),
                     NavItem(
@@ -166,14 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       label: 'Profile',
                       isSelected: false,
                       onTap: () {
-                        // Add haptic feedback
                         HapticFeedback.selectionClick();
-                        Navigator.push(
-                          context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const ProfileScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/profile');
                       },
                     ),
                   ],
@@ -235,10 +197,7 @@ class HomeContent extends StatelessWidget {
             TextButton(
               onPressed: () {
                 HapticFeedback.selectionClick();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GenresScreen()),
-                );
+                Navigator.pushNamed(context, '/genres');
               },
               child: const Text(
                 'See All',
@@ -306,10 +265,7 @@ class HomeContent extends StatelessWidget {
             TextButton(
               onPressed: () {
                 HapticFeedback.selectionClick();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const GenresScreen()),
-                );
+                Navigator.pushNamed(context, '/genres');
               },
               child: const Text(
                 'See All',
@@ -346,14 +302,10 @@ class HomeContent extends StatelessWidget {
       child: InkWell(
         onTap: () {
           HapticFeedback.mediumImpact();
-          Navigator.push(
+          Navigator.pushNamed(
             context,
-            MaterialPageRoute(
-              builder: (context) => GenreDetailsScreen(
-                genre: name,
-                color: color,
-              ),
-            ),
+            '/genre_details',
+            arguments: {'genre': name, 'color': color},
           );
         },
         borderRadius: BorderRadius.circular(16),

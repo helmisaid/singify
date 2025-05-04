@@ -2,21 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:singify/models/song_model.dart';
-import 'package:singify/screens/home_screen.dart';
-import 'package:singify/screens/search_screen.dart';
-import 'package:singify/screens/favorites_screen.dart';
-import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/services/favorites_service.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 
 class PlayerScreen extends StatefulWidget {
-  final Song song;
-
-  const PlayerScreen({
-    Key? key,
-    required this.song,
-  }) : super(key: key);
+  const PlayerScreen({Key? key}) : super(key: key);
 
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
@@ -24,11 +15,26 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> {
   int _currentIndex = 0;
+  late Song song;
+  late bool isFavorite;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ambil song dari arguments saat pertama kali dibuild
+    final args = ModalRoute.of(context)?.settings.arguments as Song?;
+    if (args != null) {
+      song = args;
+      final favoritesService = Provider.of<FavoritesService>(context);
+      isFavorite = favoritesService.isFavorite(song.id);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final favoritesService = Provider.of<FavoritesService>(context);
-    final isFavorite = favoritesService.isFavorite(widget.song.id);
+    // Update isFavorite saat build untuk sinkronisasi
+    isFavorite = favoritesService.isFavorite(song.id);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -110,7 +116,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       
                       // Song Info
                       Text(
-                        widget.song.title,
+                        song.title,
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -120,7 +126,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        widget.song.artist,
+                        song.artist,
                         style: const TextStyle(
                           fontSize: 16,
                           color: Color(0xFF666666), // Darker text
@@ -166,11 +172,14 @@ class _PlayerScreenState extends State<PlayerScreen> {
                               onTap: () {
                                 print("Favorite button pressed");
                                 HapticFeedback.mediumImpact();
-                                favoritesService.toggleFavorite(widget.song);
+                                favoritesService.toggleFavorite(song);
+                                setState(() {
+                                  isFavorite = favoritesService.isFavorite(song.id);
+                                });
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text(
-                                      isFavorite ? 'Removed from favorites' : 'Added to favorites'
+                                      isFavorite ? 'Added to favorites' : 'Removed from favorites'
                                     ),
                                     duration: const Duration(seconds: 1),
                                   ),
@@ -257,7 +266,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       const SizedBox(height: 32),
                       
                       // Lyrics Section
-                      if (widget.song.lyrics != null) ...[
+                      if (song.lyrics != null) ...[
                         const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
@@ -274,7 +283,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(0),
                           child: Text(
-                            widget.song.lyrics!,
+                            song.lyrics!,
                             style: const TextStyle(
                               fontSize: 16,
                               height: 1.6,
@@ -345,10 +354,9 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       isSelected: _currentIndex == 0,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to home screen
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          '/home',
                           (route) => false,
                         );
                       },
@@ -359,11 +367,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       isSelected: _currentIndex == 1,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to search/explore screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SearchScreen()),
-                        );
+                        Navigator.pushNamed(context, '/search');
                       },
                     ),
                     NavItem(
@@ -372,12 +376,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       isSelected: _currentIndex == 2,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to favorites screen
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const FavoritesScreen(showFullScreen: true),
-                          ),
+                          '/favorites',
+                          arguments: {'showFullScreen': true},
                         );
                       },
                     ),
@@ -387,13 +389,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                       isSelected: _currentIndex == 3,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to profile screen
-                        Navigator.push(
-                          context,
-                          NoAnimationPageRoute(
-                            builder: (context) => const ProfileScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/profile');
                       },
                     ),
                   ],
