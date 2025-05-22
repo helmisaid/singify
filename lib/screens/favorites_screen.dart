@@ -2,21 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:singify/models/song_model.dart';
-import 'package:singify/screens/home_screen.dart';
-import 'package:singify/screens/search_screen.dart';
-import 'package:singify/screens/profile_screen.dart';
 import 'package:singify/services/favorites_service.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
 import 'package:singify/widgets/popular_lyric_card.dart';
 
 class FavoritesScreen extends StatefulWidget {
-  final bool showFullScreen;
-  
-  const FavoritesScreen({
-    Key? key, 
-    this.showFullScreen = false,
-  }) : super(key: key);
+  const FavoritesScreen({Key? key}) : super(key: key);
 
   @override
   State<FavoritesScreen> createState() => _FavoritesScreenState();
@@ -24,17 +16,27 @@ class FavoritesScreen extends StatefulWidget {
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
   final int _currentIndex = 2; // Favorites tab selected
-  
+  late bool showFullScreen;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ambil showFullScreen dari arguments saat pertama kali dibuild
+    final args =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    showFullScreen = args?['showFullScreen'] ?? false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final favoritesService = Provider.of<FavoritesService>(context);
     final favoriteSongs = favoritesService.favoriteSongs;
 
     // If not showing as full screen, just return the content
-    if (!widget.showFullScreen) {
+    if (!showFullScreen) {
       return _buildContent(favoriteSongs);
     }
-    
+
     // Otherwise, return a full scaffold with navigation
     return Scaffold(
       backgroundColor: Colors.white,
@@ -52,48 +54,46 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   children: [
                     Text(
                       'Singify',
-                      style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                        color: const Color(0xFF8b2cf5),
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineLarge?.copyWith(
+                                color: const Color(0xFF8b2cf5),
+                                fontWeight: FontWeight.bold,
+                              ),
                     ),
                     Material(
                       color: Colors.transparent,
                       shape: const CircleBorder(),
                       clipBehavior: Clip.hardEdge,
                       child: IconButton(
-                        icon: const Icon(Icons.search, color: Color(0xFF666666)),
+                        icon:
+                            const Icon(Icons.search, color: Color(0xFF666666)),
                         onPressed: () {
                           // Add haptic feedback
                           HapticFeedback.selectionClick();
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SearchScreen(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/search');
                         },
                         splashColor: const Color(0xFF8b2cf5).withOpacity(0.2),
-                        highlightColor: const Color(0xFF8b2cf5).withOpacity(0.1),
+                        highlightColor:
+                            const Color(0xFF8b2cf5).withOpacity(0.1),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            
+
             // Divider for visual separation
             Divider(
               height: 1,
               thickness: 1,
               color: Colors.grey[200],
             ),
-            
+
             // Main Content
             Expanded(
               child: _buildContent(favoriteSongs),
             ),
-            
+
             // Bottom Navigation
             Container(
               decoration: BoxDecoration(
@@ -118,10 +118,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       isSelected: _currentIndex == 0,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to home screen
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          '/home',
                           (route) => false,
                         );
                       },
@@ -132,11 +131,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       isSelected: _currentIndex == 1,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to search/explore screen
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const SearchScreen()),
-                        );
+                        Navigator.pushReplacementNamed(context, '/search');
                       },
                     ),
                     NavItem(
@@ -154,13 +149,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       isSelected: _currentIndex == 3,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to profile screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ProfileScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/profile');
                       },
                     ),
                   ],
@@ -172,7 +161,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       ),
     );
   }
-  
+
   Widget _buildContent(List<Song> favoriteSongs) {
     return Padding(
       padding: const EdgeInsets.all(defaultPadding),
@@ -188,7 +177,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ),
           ),
           const SizedBox(height: 15),
-          
           Expanded(
             child: favoriteSongs.isEmpty
                 ? Center(

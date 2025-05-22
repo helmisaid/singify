@@ -14,9 +14,13 @@ dependencies:
   cupertino_icons: ^1.0.5
   provider: ^6.0.5  # Untuk state management
   audio_service: ^0.18.10  # Untuk layanan audio background
-  just_audio: ^0.9.34  # Untuk pemutaran audio
   cached_network_image: ^3.2.3  # Untuk caching gambar
   font_awesome_flutter: ^10.6.0  # Untuk FontAwesome icons
+  pocketbase: ^0.22.0
+  http: ^1.3.0
+  shared_preferences: ^2.2.0
+  logger: ^2.0.0
+  just_audio: ^0.10.3
 
 dev_dependencies:
   flutter_test:
@@ -26,5 +30,3 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   
-  assets:
-    - assets/images/album_covers/

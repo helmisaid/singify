@@ -1,39 +1,52 @@
+import 'package:pocketbase/pocketbase.dart';
+
 class Song {
   final String id;
+  final String collectionId;
   final String title;
-  final String artist;
-  final String albumArt;
-  final bool isFavorite;
+  final String artistId;
+  final String artistName;
+  final String albumId;
+  final String albumName;
+  final String songFile;
+  final String songImage;
+  final DateTime releaseDate;
+  final int playCount;
   final String? lyrics;
-  final String genre;
 
   Song({
     required this.id,
+    required this.collectionId,
     required this.title,
-    required this.artist,
-    required this.albumArt,
-    this.isFavorite = false,
+    required this.artistId,
+    required this.artistName,
+    required this.albumId,
+    required this.albumName,
+    required this.songFile,
+    required this.songImage,
+    required this.releaseDate,
+    required this.playCount,
     this.lyrics,
-    this.genre = 'Pop', // Default genre
   });
 
-  Song copyWith({
-    String? id,
-    String? title,
-    String? artist,
-    String? albumArt,
-    bool? isFavorite,
-    String? lyrics,
-    String? genre,
-  }) {
+  // Factory constructor to create a Song from a PocketBase RecordModel
+  factory Song.fromRecord(RecordModel record) {
+    // Handle expanded relations
+    final artistRecord = record.expand['artist_id'] as RecordModel?;
+    final albumRecord = record.expand['album_id'] as RecordModel?;
+
     return Song(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      artist: artist ?? this.artist,
-      albumArt: albumArt ?? this.albumArt,
-      isFavorite: isFavorite ?? this.isFavorite,
-      lyrics: lyrics ?? this.lyrics,
-      genre: genre ?? this.genre,
+      id: record.id,
+      collectionId: record.collectionId,
+      title: record.getStringValue('title'),
+      artistId: record.getStringValue('artist_id'),
+      artistName: artistRecord?.getStringValue('name') ?? 'Unknown Artist',
+      albumId: record.getStringValue('album_id'),
+      albumName: albumRecord?.getStringValue('name') ?? 'Unknown Album',
+      songFile: record.getStringValue('song_file'),
+      songImage: record.getStringValue('song_image'),
+      releaseDate: DateTime.parse(record.getStringValue('release_date')),
+      playCount: record.getIntValue('play_count'),
     );
   }
 }

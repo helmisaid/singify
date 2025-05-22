@@ -36,7 +36,7 @@ class GenreCard extends StatelessWidget {
           Navigator.pushNamed(
             context,
             '/genre_details',
-            arguments: {'genre': genre.name, 'color': color},
+            arguments: {'genreId': genre.id, 'genreName': genre.name, 'color': color},
           );
         },
         borderRadius: BorderRadius.circular(12),

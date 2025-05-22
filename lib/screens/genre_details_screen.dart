@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:singify/models/song_model.dart';
+import 'package:singify/services/pocketbase_service.dart';
 import 'package:singify/utils/constants.dart';
 import 'package:singify/widgets/nav_item.dart';
-import 'package:singify/widgets/popular_lyric_card.dart';
+import 'package:singify/widgets/featured_song_card.dart';
+import 'package:pocketbase/pocketbase.dart';
 
 class GenreDetailsScreen extends StatefulWidget {
   const GenreDetailsScreen({Key? key}) : super(key: key);
@@ -14,57 +16,51 @@ class GenreDetailsScreen extends StatefulWidget {
 
 class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
   int _currentIndex = 0;
-  late List<Song> _genreSongs;
-  late String genre;
-  late Color color;
+  final PocketBaseService _pbService = PocketBaseService();
+  List<Song> _genreSongs = [];
+  bool _isLoading = true;
+  String _errorMessage = '';
+  late String _genreId;
+  late String _genreName;
+  late Color _color;
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get arguments
+    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+    if (args != null) {
+      _genreId = args['genreId'] as String;
+      _genreName = args['genreName'] as String;
+      _color = args['color'] as Color;
+      _fetchSongs();
+    }
+  }
 
-    // Parameter genre dan color akan diambil dari arguments di build()
-    // Inisialisasi _genreSongs dilakukan setelah mendapatkan genre
+  Future<void> _fetchSongs() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+
+      final records = await _pbService.getSongsByGenre(_genreId);
+      final songs = records.map((record) => Song.fromRecord(record)).toList();
+
+      setState(() {
+        _genreSongs = songs;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Failed to load songs: $e';
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // Ambil parameter dari arguments
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    genre = args?['genre'] ?? 'Unknown Genre';
-    color = args?['color'] ?? Colors.grey;
-
-    // Filter songs by genre
-    _genreSongs = [...featuredSongs, ...popularLyrics].where((song) {
-      return song.genre.toLowerCase() == genre.toLowerCase();
-    }).toList();
-
-    // Jika tidak ada lagu yang cocok dengan genre, tambah placeholder
-    if (_genreSongs.isEmpty) {
-      _genreSongs = [
-        Song(
-          id: 'g1',
-          title: '$genre Hit 1',
-          artist: 'Various Artists',
-          albumArt: 'assets/images/album_covers/default.jpg',
-          genre: genre,
-        ),
-        Song(
-          id: 'g2',
-          title: '$genre Hit 2',
-          artist: 'Top $genre Artist',
-          albumArt: 'assets/images/album_covers/default.jpg',
-          genre: genre,
-        ),
-        Song(
-          id: 'g3',
-          title: 'Best of $genre',
-          artist: 'Various Artists',
-          albumArt: 'assets/images/album_covers/default.jpg',
-          genre: genre,
-        ),
-      ];
-    }
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -135,24 +131,26 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
-              color: color.withOpacity(0.1),
+              color: _color.withOpacity(0.1),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    genre,
+                    _genreName,
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
-                      color: color,
+                      color: _color,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${_genreSongs.length} Songs',
+                    _isLoading 
+                      ? 'Loading songs...' 
+                      : '${_genreSongs.length} Songs',
                     style: TextStyle(
                       fontSize: 16,
-                      color: color.withOpacity(0.8),
+                      color: _color.withOpacity(0.8),
                     ),
                   ),
                 ],
@@ -161,34 +159,82 @@ class _GenreDetailsScreenState extends State<GenreDetailsScreen> {
 
             // Main Content - Song List
             Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Popular in $genre',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF282828),
-                      ),
+              child: _isLoading
+                ? const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF8b2cf5)),
                     ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _genreSongs.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16),
-                            child: PopularLyricCard(song: _genreSongs[index]),
-                          );
-                        },
+                  )
+                : _errorMessage.isNotEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _errorMessage,
+                            style: const TextStyle(color: Colors.red),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: _fetchSongs,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8b2cf5),
+                            ),
+                            child: const Text('Retry'),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-              ),
+                    )
+                  : _genreSongs.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.music_off,
+                              size: 64,
+                              color: Colors.grey[300],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No songs found in $_genreName',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Popular in $_genreName',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF282828),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: _genreSongs.length,
+                                itemBuilder: (context, index) {
+                                  return Padding(
+                                    padding: const EdgeInsets.only(bottom: 16),
+                                    child: FeaturedSongCard(song: _genreSongs[index]),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
             ),
 
             // Bottom Navigation

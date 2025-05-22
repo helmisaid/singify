@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:singify/screens/login_screen.dart';
 import 'package:singify/services/auth/auth_repository.dart';
-import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -12,25 +11,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _checkAuthStatus();
-  }
-
-  Future<void> _checkAuthStatus() async {
-    final authRepository = Provider.of<AuthRepository>(context, listen: false);
-    final isAuthenticated = await authRepository.isLoggedIn();
-
-    if (!isAuthenticated && mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        '/login',
-        (route) => false,
-      );
-    }
-  }
-
+  
   // Auth repository instance
   final _authRepository = AuthRepository();
   bool _isLoggingOut = false;
@@ -655,38 +636,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  // Perform logout
-  Future<void> _performLogout() async {
-    try {
-      setState(() {
-        _isLoggingOut = true;
-      });
+Future<void> _performLogout() async {
+  try {
+    setState(() {
+      _isLoggingOut = true;
+    });
 
-      // Call the logout method from AuthRepository
-      await _authRepository.logout();
+    await _authRepository.logout();
 
-      // Navigate to login screen after successful logout
-      if (mounted) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-          (route) => false, // Remove all previous routes
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _isLoggingOut = false;
-      });
+    if (!mounted) return;
 
-      // Show error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Logout failed: $e'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-    }
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/login',
+      (route) => false,
+    );
+  } catch (e) {
+    if (!mounted) return;
+
+    setState(() {
+      _isLoggingOut = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Logout failed: $e'),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
+}
 
   // Show logout confirmation dialog
   void _showLogoutConfirmationDialog() {

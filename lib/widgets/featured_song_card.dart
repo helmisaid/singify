@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:singify/models/song_model.dart';
 import 'package:singify/services/favorites_service.dart';
+import 'package:singify/services/pocketbase_service.dart';
 import 'package:singify/utils/constants.dart';
 
 class FeaturedSongCard extends StatelessWidget {
@@ -16,117 +18,153 @@ class FeaturedSongCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final favoritesService = Provider.of<FavoritesService>(context);
     final isFavorite = favoritesService.isFavorite(song.id);
+    final PocketBaseService pbService = PocketBaseService();
 
-    return Material(
-      color: cardColor,
-      borderRadius: BorderRadius.circular(15),
-      elevation: 1, // Reduced elevation for more modern look
-      child: InkWell(
-        onTap: () {
-          print("Featured song card tapped: ${song.title}");
-          Navigator.pushNamed(
-            context,
-            '/player',
-            arguments: song,
-          );
-        },
-        borderRadius: BorderRadius.circular(15),
-        child: Padding(
-          padding: const EdgeInsets.all(16), // Slightly increased padding
-          child: Row(
-            children: [
-              Hero(
-                tag: 'album-art-${song.id}',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    song.albumArt,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.music_note, size: 40),
-                      );
-                    },
+    // Get the album art URL using the simplified method
+    final albumArtUrl = pbService.getSongImageUrl(
+      song.collectionId,
+      song.id,
+      song.songImage,
+    );
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            HapticFeedback.mediumImpact();
+            Navigator.pushNamed(
+              context,
+              '/player',
+              arguments: song,
+            );
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                // Album art
+                Hero(
+                  tag: 'album-art-${song.id}',
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        albumArtUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Center(
+                            child: Icon(
+                              Icons.music_note,
+                              color: const Color(0xFF8b2cf5),
+                              size: 40,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 16), // Increased spacing
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      song.title,
-                      style: titleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 6), // Added spacing
-                    Text(
-                      song.artist,
-                      style: subtitleStyle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 16), // Increased spacing
-                    Row(
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            print("Play Now button pressed: ${song.title}");
-                            Navigator.pushNamed(
-                              context,
-                              '/player',
-                              arguments: song,
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.play_arrow,
-                            size: 20,
-                            color: Colors.white, // Mengubah warna icon play menjadi putih
-                          ),
-                          label: const Text('Play Now'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 10),
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                const SizedBox(width: 16),
+                // Song details
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        song.title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF282828),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        song.artistName,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          // Play Now button
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              Navigator.pushNamed(
+                                context,
+                                '/player',
+                                arguments: song,
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.play_arrow,
+                              size: 18,
+                            ),
+                            label: const Text('Play Now'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF8b2cf5),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              textStyle: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        IconButton(
-                          icon: Icon(
-                            isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorite ? Colors.red : Colors.grey,
-                            size: 24,
+                          const SizedBox(width: 12),
+                          // Favorite button
+                          IconButton(
+                            icon: Icon(
+                              isFavorite ? Icons.favorite : Icons.favorite_border,
+                              color: isFavorite ? const Color(0xFF8b2cf5) : Colors.grey[400],
+                            ),
+                            onPressed: () {
+                              HapticFeedback.mediumImpact();
+                              favoritesService.toggleFavorite(song);
+                            },
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
                           ),
-                          onPressed: () {
-                            favoritesService.toggleFavorite(song);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(isFavorite
-                                    ? 'Removed from favorites'
-                                    : 'Added to favorites'),
-                                duration: const Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

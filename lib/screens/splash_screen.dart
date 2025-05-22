@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:singify/screens/login_screen.dart';
+import 'package:singify/screens/home_screen.dart';
+import 'package:singify/services/auth/auth_repository.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -9,7 +12,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _rotationAnimation;
   late Animation<double> _radiusAnimation;
@@ -17,13 +21,13 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   void initState() {
     super.initState();
-    
+
     // Set up the animations
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
-    
+
     // Rotation animation
     _rotationAnimation = Tween<double>(begin: 0, end: 1).animate(
       CurvedAnimation(
@@ -31,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         curve: Curves.easeInOut,
       ),
     );
-    
+
     // Radius animation for pulsing effect
     _radiusAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
       CurvedAnimation(
@@ -39,16 +43,46 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         curve: Curves.easeInOut,
       ),
     );
-    
+
     // Start the animation and loop it
     _animationController.repeat(reverse: true);
-    
-    // Navigate to login screen after 3 seconds
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    });
+
+    // Periksa status autentikasi setelah 2 detik (sesuai durasi splash)
+    _checkAuthStatus();
+  }
+
+  Future<void> _checkAuthStatus() async {
+    try {
+      final authRepository =
+          Provider.of<AuthRepository>(context, listen: false);
+      final isAuthenticated = await authRepository.isLoggedIn();
+
+      // Tambahkan penundaan untuk efek splash
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          isAuthenticated ? '/home' : '/login',
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error checking authentication: $e'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/login',
+          (route) => false,
+        );
+      }
+    }
   }
 
   @override
@@ -77,16 +111,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(flex: 3),
-            
+
             // Music note icon
             const Icon(
               Icons.music_note,
               size: 80,
               color: Colors.white,
             ),
-            
+
             const SizedBox(height: 30),
-            
+
             // App name
             const Text(
               'Singify',
@@ -97,9 +131,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 letterSpacing: 1.2,
               ),
             ),
-            
+
             const SizedBox(height: 10),
-            
+
             // Tagline
             const Text(
               'Your Lyrics Companion',
@@ -110,9 +144,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 letterSpacing: 0.5,
               ),
             ),
-            
+
             const Spacer(flex: 2),
-            
+
             // Enhanced loading spinner with multiple animations
             AnimatedBuilder(
               animation: _animationController,
@@ -135,7 +169,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                       ),
                     ),
-                    
+
                     // Middle pulsing circle
                     Transform.scale(
                       scale: _radiusAnimation.value,
@@ -151,10 +185,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                       ),
                     ),
-                    
+
                     // Inner rotating circle (opposite direction)
                     RotationTransition(
-                      turns: Tween<double>(begin: 0, end: -1).animate(_animationController),
+                      turns: Tween<double>(begin: 0, end: -1)
+                          .animate(_animationController),
                       child: Container(
                         width: 30,
                         height: 30,
@@ -167,7 +202,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                         ),
                       ),
                     ),
-                    
+
                     // Center dot
                     Container(
                       width: 10,
@@ -181,9 +216,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 );
               },
             ),
-            
+
             const Spacer(flex: 2),
-            
+
             // Version text
             const Text(
               'Version 1.0',
@@ -193,7 +228,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 fontWeight: FontWeight.w400,
               ),
             ),
-            
+
             const SizedBox(height: 30),
           ],
         ),

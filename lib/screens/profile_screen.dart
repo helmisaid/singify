@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:singify/screens/home_screen.dart';
-import 'package:singify/screens/search_screen.dart';
-import 'package:singify/screens/favorites_screen.dart';
-import 'package:singify/screens/settings_screen.dart';
 import 'package:singify/widgets/nav_item.dart';
+import 'package:singify/services/auth/auth_service.dart';
+import 'package:singify/services/auth/auth_impl.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -14,7 +12,16 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final int _currentIndex = 3; // Profile tab selected
+  final int _currentIndex = 3;
+
+  final AuthService _authService = AuthServiceImpl();
+  Future<Map<String, dynamic>?>? _userDataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _userDataFuture = _authService.getCurrentUser();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,13 +50,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     IconButton(
                       icon: const Icon(Icons.settings, color: Colors.grey),
                       onPressed: () {
-                        // Navigate to settings screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SettingsScreen(),
-                          ),
-                        );
+                        Navigator.pushNamed(context, '/settings');
                       },
                     ),
                   ],
@@ -71,42 +72,103 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const SizedBox(height: 24),
 
-                    // Profile Picture
-                    Container(
-                      width: 120,
-                      height: 120,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white,
-                          width: 4,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black
-                                .withOpacity(0.05), // Reduced opacity
-                            blurRadius: 5, // Reduced blur
-                            offset: const Offset(0, 2), // Smaller offset
-                          ),
-                        ],
-                        image: const DecorationImage(
-                          image: NetworkImage(
-                              'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-dns8kF9TgsPoh8DSbZKIVMrrvbRtD3.png'),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                    // Profile Picture (Dynamic from PocketBase)
+                    FutureBuilder<Map<String, dynamic>?>(
+                      future: _userDataFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError || snapshot.data == null) {
+                          // Fallback to a placeholder image if data is unavailable
+                          return Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 4,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                              image: const DecorationImage(
+                                image: NetworkImage(
+                                    'https://via.placeholder.com/120'), // Placeholder
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        } else {
+                          final userData = snapshot.data!;
+                          // Assuming the avatar is stored as a file reference in PocketBase
+                          final avatarUrl = userData['avatar'] != null
+                              ? 'http://127.0.0.1:8090/api/files/users/${userData['id']}/${userData['avatar']}'
+                              : 'https://via.placeholder.com/120'; // Fallback if no avatar
+
+                          return Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white,
+                                width: 4,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.05),
+                                  blurRadius: 5,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                              image: DecorationImage(
+                                image: NetworkImage(avatarUrl),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
 
                     const SizedBox(height: 16),
 
                     // Name
-                    const Text(
-                      'Sarah Wilson',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                    FutureBuilder<Map<String, dynamic>?>(
+                      future: _userDataFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError || snapshot.data == null) {
+                          return const Text(
+                            'Error loading profile',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          );
+                        } else {
+                          final userData = snapshot.data!;
+                          final name = userData['name'] ??
+                              'Unknown User'; // Ganti 'name' dengan field yang sesuai dari PocketBase
+                          return Text(
+                            name,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          );
+                        }
+                      },
                     ),
 
                     const SizedBox(height: 4),
@@ -260,11 +322,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       isSelected: _currentIndex == 0,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to home screen
-                        Navigator.pushAndRemoveUntil(
+                        Navigator.pushNamedAndRemoveUntil(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomeScreen()),
+                          '/home',
                           (route) => false,
                         );
                       },
@@ -275,12 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       isSelected: _currentIndex == 1,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to search/explore screen
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const SearchScreen()),
-                        );
+                        Navigator.pushNamed(context, '/search');
                       },
                     ),
                     NavItem(
@@ -289,13 +344,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       isSelected: _currentIndex == 2,
                       onTap: () {
                         HapticFeedback.selectionClick();
-                        // Navigate to favorites screen
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const FavoritesScreen(showFullScreen: true),
-                          ),
+                          '/favorites',
+                          arguments: {'showFullScreen': true},
                         );
                       },
                     ),
@@ -304,8 +356,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: 'Profile',
                       isSelected: _currentIndex == 3,
                       onTap: () {
-                        // Already on profile screen
                         HapticFeedback.selectionClick();
+                        // Already on profile screen
                       },
                     ),
                   ],

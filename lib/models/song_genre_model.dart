@@ -1,30 +1,28 @@
 import 'package:pocketbase/pocketbase.dart';
 
-class Genre {
+class SongGenre {
   final String id;
   final String collectionId;
-  final String name;
-  final String description;
+  final String songId;
+  final String genreId;
   final DateTime created;
   final DateTime updated;
-  int songCount; // Added for UI compatibility
 
-  Genre({
+  SongGenre({
     required this.id,
     required this.collectionId,
-    required this.name,
-    required this.description,
+    required this.songId,
+    required this.genreId,
     required this.created,
     required this.updated,
-    this.songCount = 0,
   });
 
-  factory Genre.fromRecord(RecordModel record) {
-    return Genre(
+  factory SongGenre.fromRecord(RecordModel record) {
+    return SongGenre(
       id: record.id,
       collectionId: record.collectionId,
-      name: record.getStringValue('name'),
-      description: record.getStringValue('description'),
+      songId: record.getStringValue('song_id'),
+      genreId: record.getStringValue('genre_id'),
       created: DateTime.parse(record.getStringValue('created')),
       updated: DateTime.parse(record.getStringValue('updated')),
     );

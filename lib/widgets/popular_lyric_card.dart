@@ -26,7 +26,7 @@ class PopularLyricCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap ??
             () {
-              print("Popular lyric card tapped: ${song.title}");
+              debugPrint("Popular lyric card tapped: ${song.title}");
               Navigator.pushNamed(
                 context,
                 '/player',
@@ -51,7 +51,7 @@ class PopularLyricCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8), // Increased spacing
                     Text(
-                      song.artist,
+                      song.artistName, // Updated from song.artist to song.artistName
                       style: subtitleStyle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -72,7 +72,7 @@ class PopularLyricCard extends StatelessWidget {
                       ),
                       onPressed: onTap ??
                           () {
-                            print("Play button pressed: ${song.title}");
+                            debugPrint("Play button pressed: ${song.title}");
                             Navigator.pushNamed(
                               context,
                               '/player',
@@ -93,7 +93,7 @@ class PopularLyricCard extends StatelessWidget {
                         size: 28,
                       ),
                       onPressed: () {
-                        print("Favorite button pressed: ${song.title}");
+                        debugPrint("Favorite button pressed: ${song.title}");
                         favoritesService.toggleFavorite(song);
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
